@@ -1,23 +1,31 @@
 import { error, json } from '@sveltejs/kit';
 
 import { db } from '$lib/server/db';
-import { hooks, logs } from '$lib/server/db/schema.js';
+import { users, hooks, logs } from '$lib/server/db/schema.js';
 import { eq } from 'drizzle-orm';
 
 import { BUILD } from '$lib/utils/hooks.js';
 
 export async function POST({ request: req, params }) {
-	const hook = (await db.select().from(hooks).where(eq(hooks.id, params.id)))?.[0];
-	if(!hook) return error(404, 'Hook not found.');
+	const user = (await db.select().from(users).where(eq(users.id, params.id)))?.[0];
+	if(!user) return error(404, 'Endpoint not found.');
+	if(!user.key) return error(400, 'Setup incomplete for this system.');
+
 
 	const data = await req.json();
 	console.log(data);
-	if(hook.key !== data.signing_token) return error(401, 'Invalid signing token.');
-	
-	if(data.type == 'PING') return json({ success: true });
-	if(!hook.events.includes(data.type)) return json({ message: 'Event not accepted on this webhook.' });
 
-	console.log('doing the webhook...');
+	if(data.type == 'PING') return json({ success: true });
+
+	const hook = (await db.select().from(hooks).where(and(
+		eq(hooks.userId, params.id),
+		eq(hooks.event, data.type)
+	)))?.[0];
+	if(!hook) return error(400, 'No hook set up for that event.');
+
+	if(user.key !== data.signing_token) return error(401, 'Invalid signing token.');	
+
+	console.log(`Dispatching webhook: ${hook.id}`, hook, data);
 	let resp;
 	try {
 		let built = await BUILD(data, hook.data);

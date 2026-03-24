@@ -13,8 +13,10 @@ const EXPIRY = 365 * 24 * 60 * 60 * 1000;
 export const users = pgTable('users', {
 	id: uuid('id').defaultRandom().primaryKey(),
 	discordId: text('discord_id').notNull(),
+	systemId: text('system_id'),
 	name: text().notNull(),
 	avatar: text().notNull(),
+	key: text()
 })
 
 // for user logins
@@ -28,10 +30,8 @@ export const tokens = pgTable('tokens', {
 export const hooks = pgTable('hooks', {
 	id: uuid('id').defaultRandom().primaryKey(),
 	userId: uuid('user_id').references(() => users.id).notNull(),
-	name: text('name').notNull(),
+	event: text('event'),
 	url: text('url').notNull(),
-	key: text('key'),
-	events: text('events').array(),
 	data: jsonb('data'),
 });
 
