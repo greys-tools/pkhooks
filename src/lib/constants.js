@@ -1,4 +1,5 @@
 import { PUBLIC_HOST } from '$env/static/public';
+import { formatName } from '$lib/utils/misc';
 
 export const DISCORD = {
 	api: 'https://discord.com/api/v10',
@@ -47,3 +48,6 @@ export const EVENTS = [
 	
 	'UPDATE_AUTOPROXY',
 ];
+
+const EventNames = new Map(EVENTS.map(x => [x, formatName(x)]));
+export { EventNames }

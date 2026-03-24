@@ -15,15 +15,19 @@ export async function POST({ request: req, params }) {
 	const data = await req.json();
 	console.log(data);
 
-	if(data.type == 'PING') return json({ success: true });
+	if(user.key !== data.signing_token) return error(401, 'Invalid signing token.');
+	if(data.type == 'PING') {
+		if(data.system_id !== user.systemId) {
+			await db.update(users).set({ systemId: data.system_id }).where(eq(users.id, user.id));
+		}
+		return json({ success: true });
+	}
 
 	const hook = (await db.select().from(hooks).where(and(
 		eq(hooks.userId, params.id),
 		eq(hooks.event, data.type)
 	)))?.[0];
 	if(!hook) return error(400, 'No hook set up for that event.');
-
-	if(user.key !== data.signing_token) return error(401, 'Invalid signing token.');	
 
 	console.log(`Dispatching webhook: ${hook.id}`, hook, data);
 	let resp;

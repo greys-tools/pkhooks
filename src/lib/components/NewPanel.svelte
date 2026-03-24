@@ -1,47 +1,13 @@
 <script>
 	import { slide } from 'svelte/transition';
+	import { enhance } from '$app/forms';
+	import { page } from '$app/state';
 
-	import {
-		Combobox,
-		Portal,
-		useListCollection,
-	} from '@skeletonlabs/skeleton-svelte';
-
-	import { EVENTS } from '$lib/constants.js';
+	import { EVENTS, EventNames } from '$lib/constants.js';
+	import { enhancedUpdate as upd } from '$lib/utils/misc.js';
 
 	let { open = $bindable() } = $props();
-
-	let edata = EVENTS.map(x => ({ label: x.toLowerCase(), value: x }));
-	let value = $state([]);
-	let items = $state(edata);
-	let collection = $derived(
-		useListCollection({
-			items: items,
-			itemToString: (item) => item.label,
-			itemToValue: (item) => item.value,
-		})
-	);
-
-	const onOpenChange = () => {
-		items = edata;
-	};
-
-	const onInputValueChange = (event) => {
-		const filtered = edata.filter((item) => item.value.toLowerCase().includes(event.inputValue.toLowerCase()));
-		if (filtered.length > 0) {
-			items = filtered;
-		} else {
-			items = edata;
-		}
-	};
-
-	const onValueChange = (event) => {
-		value = event.value;
-	};
-
-	const removeValue = (val) => {
-		value = value.filter(x => x != val);
-	}
+	let filtered = $derived.by(() => EVENTS.filter(x => !page.data.events.includes(x)));
 </script>
 
 {#if open}
@@ -50,48 +16,23 @@
 		<h3 class="h3">New Hook</h3>
 	</div>
 	<div class="w-full p-4">
-		<form class="space-y-4" method="POST" action="/dash?/create">
-			<label class="label">
-				<span class="label-text">Name</span>
-				<input class="input" type="text" name="name" placeholder="Name" />
-			</label>
+		<form class="space-y-4" method="POST" action="/dash?/create" use:enhance={upd}>
 			<label class="label">
 				<span class="label-text">Webhook URL</span>
 				<input class="input" type="text" name="url" placeholder="Discord webhook URL" />
 			</label>
 
 			<label class="label">
-				<span class="label-text">Events</span>
-				<input type="hidden" name="events" value={value.join(',')} />
+				<span class="label-text">Event</span>
+				<select class="select">
+					{#each filtered as evt}
+						<option value={evt}>{EventNames.get(evt)}</option>
+					{/each}
+				</select>
 			</label>
-			<Combobox placeholder="Search..." {collection} {onOpenChange} {onInputValueChange} {value} {onValueChange} multiple>
-				<Combobox.Control>
-					<Combobox.Input />
-					<Combobox.Trigger />
-				</Combobox.Control>
-				<Portal>
-					<Combobox.Positioner>
-						<Combobox.Content class="z-50 max-h-48 overflow-auto">
-							{#each items as item (item.value)}
-								<Combobox.Item {item}>
-									<Combobox.ItemText>{item.label}</Combobox.ItemText>
-									<Combobox.ItemIndicator />
-								</Combobox.Item>
-							{/each}
-						</Combobox.Content>
-					</Combobox.Positioner>
-				</Portal>
-			</Combobox>
-			<div class="flex flex-wrap gap-2">
-				{#each value as item (item)}
-					<button type="button" class="badge preset-filled" onclick={() => removeValue(item)}>
-						{item}
-					</button>
-				{/each}
-			</div>
 
 			<fieldset class="text-center">
-				<button type="submit" class="btn preset-filled-primary-500">Submit</button>
+				<button type="submit" class="btn preset-filled-primary-500 text-white">Submit</button>
 			</fieldset>
 		</form>
 	</div>

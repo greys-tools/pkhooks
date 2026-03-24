@@ -1,7 +1,7 @@
 import { redirect, fail } from '@sveltejs/kit';
 
 import { db } from '$lib/server/db';
-import { hooks } from '$lib/server/db/schema.js';
+import { hooks, users } from '$lib/server/db/schema.js';
 import { eq, and } from 'drizzle-orm';
 
 import { DISCORD } from '$lib/constants.js';
@@ -12,7 +12,10 @@ export async function load({ locals }) {
 	let h = await db.select().from(hooks).where(eq(hooks.userId, locals.user.id));
 	console.log(h);
 
-	return { hooks: h, user: locals.user };
+	let events = h.map(hk => hk.event);
+	console.log(events);
+
+	return { hooks: h, events, user: locals.user };
 }
 
 export const actions = {
@@ -20,22 +23,19 @@ export const actions = {
 		if(!locals?.user) return fail(401, { success: false, err: 'Must be logged in.' });
 
 		let fd = await request.formData();
-		let name = fd.get('name');
-		if(!name?.length) return fail(400, { success: false, err: 'Name is required.'});
 
 		let url = fd.get('url');
 		if(!url?.length) return fail(400, { success: false, err: 'URL is required.'});
 		if(!url.match(DISCORD.regex)?.length) return fail(400, { success: false, err: 'URL must be a Discord webhook link.'});
 		
-		let events = fd.get('events');
-		if(!events?.length) return fail(400, { success: false, err: 'Events are required.' });
-		events = events.split(',');
+		let event = fd.get('event');
+		if(!event?.length) return fail(400, { success: false, err: 'Event is required.' });
 
 		let hook = await db.insert(hooks).values({
 			userId: locals.user.id,
 			name,
 			url,
-			events
+			event
 		}).returning();
 
 		return { success: true, hook: hook[0] };
@@ -53,22 +53,25 @@ export const actions = {
 		));
 
 		if(!exists?.[0]) return fail(404, { success: false, err: 'Hook not found.' });
-		
-		let name = fd.get('name');
-		if(!name?.length) return fail(400, { success: false, err: 'Name is required.'});
 
-		let events = fd.get('events');
-		if(!events?.length) return fail(400, { success: false, err: 'Events are required.' });
-		events = events.split(',');
-
-		let key = fd.get('key');
-
+		let url = fd.get('url');		
 		let hook = await db.update(hooks).set({
-			name,
-			events,
-			key
+			url
 		}).where(eq(hooks.id, id)).returning();
 
 		return { success: true, hook: hook[0] };
+	},
+	key: async ({ request, locals }) => {
+		if(!locals?.user) return fail(401, { success: false, err: 'Must be logged in.' });
+
+		let fd = await request.formData();
+		let key = fd.get('key');
+		let info = fd.get('info');
+
+		let user = await db.update(users).set({
+			key
+		}).where(eq(users.id, locals.user.id)).returning();
+
+		return { success: true, user: user[0], info: !!info };
 	},
 }
