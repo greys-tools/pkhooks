@@ -1,5 +1,5 @@
 import { applyAction } from '$app/forms';
-import { goto } from '$app/navigation';
+import { goto, invalidateAll } from '$app/navigation';
 
 export const formatName = (str) => {
 	let parts = str.split('_');
@@ -13,6 +13,7 @@ export const enhancedUpdate = ({formElement, formData, action, cancel}) => {
 		if(result.type === 'redirect') {
 			goto(result.location);
 		} else {
+			await invalidateAll();
 			await applyAction(result);
 		}
 	}

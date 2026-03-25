@@ -1,8 +1,6 @@
 import { env } from '$env/dynamic/private';
 
-import { db } from '$lib/server/db';
-import { users, tokens } from '$lib/server/db/schema.js';
-import { eq } from 'drizzle-orm';
+import * as db from '$lib/server/db/functions';
 
 import jwt from 'jsonwebtoken';
 
@@ -18,14 +16,10 @@ export async function handle({ event, resolve }) {
 		}
 
 		if(decoded && decoded.tk) {
-			let token = await db.select().from(tokens).where(eq(tokens.id, decoded.tk));
-			token = token?.[0] ?? token;
+			let token = await db.getToken(decoded.tk);
 
 			if(token && token.valid && token.expires.getTime() > Date.now()) {
-				let user = await db.select().from(users).where(eq(users.id, token.userId));
-				user = user?.[0] ?? user;
-
-				if(user) event.locals.user = user;
+				event.locals.user = token.user;
 			}
 		}
 	}

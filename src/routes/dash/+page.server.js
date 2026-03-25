@@ -1,7 +1,8 @@
 import { redirect, fail } from '@sveltejs/kit';
 
+import * as q from '$lib/server/db/functions';
 import { db } from '$lib/server/db';
-import { hooks, users } from '$lib/server/db/schema.js';
+import { hooks } from '$lib/server/db/schema';
 import { eq, and } from 'drizzle-orm';
 
 import { DISCORD } from '$lib/constants.js';
@@ -9,13 +10,10 @@ import { DISCORD } from '$lib/constants.js';
 export async function load({ locals }) {
 	if(!locals?.user) return redirect(307, '/');
 
-	let h = await db.select().from(hooks).where(eq(hooks.userId, locals.user.id));
-	console.log(h);
+	let u = await q.getUser(locals.user.id);
+	console.log(u);
 
-	let events = h.map(hk => hk.event);
-	console.log(events);
-
-	return { hooks: h, events, user: locals.user };
+	return { hooks: u.hooks, user: u };
 }
 
 export const actions = {
@@ -24,18 +22,17 @@ export const actions = {
 
 		let fd = await request.formData();
 
+		let name = fd.get('name')
+		if(!name?.length) return fail(400, { success: false, err: 'Name is required.'})
+
 		let url = fd.get('url');
 		if(!url?.length) return fail(400, { success: false, err: 'URL is required.'});
 		if(!url.match(DISCORD.regex)?.length) return fail(400, { success: false, err: 'URL must be a Discord webhook link.'});
 		
-		let event = fd.get('event');
-		if(!event?.length) return fail(400, { success: false, err: 'Event is required.' });
-
 		let hook = await db.insert(hooks).values({
 			userId: locals.user.id,
 			name,
 			url,
-			event
 		}).returning();
 
 		return { success: true, hook: hook[0] };

@@ -30,10 +30,18 @@ export const tokens = pgTable('tokens', {
 export const hooks = pgTable('hooks', {
 	id: uuid('id').defaultRandom().primaryKey(),
 	userId: uuid('user_id').references(() => users.id).notNull(),
-	event: text('event'),
+	name: text('name').notNull(),
 	url: text('url').notNull(),
-	data: jsonb('data'),
 });
+
+export const embeds = pgTable('embeds', {
+	id: uuid('id').defaultRandom().primaryKey(),
+	userId: uuid('user_id').references(() => users.id).notNull(),
+	hookId: uuid('hook_id').references(() => hooks.id).notNull(),
+	event: text('event').notNull(),
+	format: jsonb('format'),
+	data: jsonb('data'),
+})
 
 export const logs = pgTable('logs', {
 	id: uuid('id').defaultRandom().primaryKey(),

@@ -17,7 +17,7 @@
 
 <div class="w-full rounded-md preset-outlined-surface-300-700 p-4">
 	<button class="grid grid-cols-[1fr_auto] w-full" onclick={() => open = !open}>
-		<p class="text-xl text-left">{EventNames.get(data.event)}</p>
+		<p class="text-xl text-left">{data.name}</p>
 		{#if open}
 			<Close class="size-8" />
 		{:else}

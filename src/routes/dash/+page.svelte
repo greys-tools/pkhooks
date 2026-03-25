@@ -24,8 +24,10 @@
 	let showKey = $state(false);
 	let inform = $derived(form?.info);
 	let showInfo = $state(inform ?? false);
+	let hooks = $derived(data.hooks);
 
 	$inspect(form)
+	$inspect(hooks)
 
 	let siteHook = $derived(`${PUBLIC_HOST}/integrations/hooks/${data.user.id}`);
 	let copy = async () => {
@@ -87,7 +89,7 @@
 
 <NewPanel bind:open={panel} />
 
-<div class="w-full flex flex-col items-center justify-center text-center">
+<div class="w-full flex flex-col items-center justify-center text-center space-y-2">
 	{#if data?.hooks?.length}
 		{#each data.hooks as hook (hook.id)}
 			<Hook data={hook} open={form?.hook?.id == hook.id} />

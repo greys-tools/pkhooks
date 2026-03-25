@@ -8,6 +8,20 @@
       "when": 1774342533111,
       "tag": "0000_sloppy_gladiator",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1774436144438,
+      "tag": "0001_icy_frank_castle",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1774436182553,
+      "tag": "0002_whole_earthquake",
+      "breakpoints": true
     }
   ]
 }
