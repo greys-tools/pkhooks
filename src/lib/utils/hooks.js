@@ -2,12 +2,12 @@ import { PKAPI } from 'pkapi.js';
 
 const client = new PKAPI();
 
-export const BUILD = async (event, hook) => {
+export const BUILD = async (event, hook, embed) => {
 	console.log(event);
 	let comps = await HOOKS[event.type](event);
 	if(comps?.err) return comps;
 
-	return BASE(comps, hook?.color);
+	return BASE(comps, embed.data?.color);
 }
 
 export const BASE = (comps, color = 'ee8833') => ({

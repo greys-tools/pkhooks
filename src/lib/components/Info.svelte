@@ -35,7 +35,7 @@
 					<p>
 						To get started, click this button to copy your hook URL to the clipboard:
 					</p>
-					<button class="btn rounded-md preset-filled-primary-500 text-white" onclick={() => copy()}>
+					<button class="btn p-1 rounded-md preset-filled-primary-500 text-white" onclick={() => copy()}>
 						<Copy />
 					</button>
 					<p>

@@ -48,5 +48,5 @@ export const logs = pgTable('logs', {
 	userId: uuid('user_id').references(() => users.id).notNull(),
 	hookId: uuid('hook_id').references(() => hooks.id).notNull(),
 	status: text(),
-	message: text(),
+	data: jsonb(),
 })

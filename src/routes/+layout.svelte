@@ -50,8 +50,8 @@
 			<AppBar.Trail>
 				<DarkMode />
 				{#if data?.user}
-					<a class="btn rounded-md hover:bg-surface-200 dark:hover:bg-surface-700" href="/dash">
-						<img class="h-[32px]" src={data.user.avatar} alt="User avatar" />
+					<a class="btn px-2 rounded-md hover:bg-surface-200 dark:hover:bg-surface-700" href="/dash">
+						<img class="h-[32px] rounded-md" src={data.user.avatar} alt="User avatar" />
 						<span>{data.user.name}</span>
 					</a>
 				{:else}
