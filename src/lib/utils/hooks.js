@@ -18,21 +18,13 @@ function handleSmallText() {
 	return ({
 		type: 'lang',
 		filter: function(text, conv, options) {
-			var regex = /^-# (.*)/;
-			console.log(text);
-			let split = text.split('\n');
-			let replaced = '';
-			for(var s of split) {
-				let matches = s.match(regex);
-				console.log(matches);
-				if(matches) {
-					s = `<small>${matches[1]}</small>`;
-				}
-
-				replaced += `\n${s}`;
+			let regex = /^-# (.*)/gm;
+			for(let match of text.matchAll(regex)) {
+				console.log(match);
+				text = text.replace(match[0], `<small>${match[1]}</small>`)
 			}
 			
-			return replaced;
+			return text;
 		}
 	})
 }
