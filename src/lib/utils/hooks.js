@@ -1,6 +1,41 @@
 import { PKAPI } from 'pkapi.js';
+import showdown from 'showdown';
 
-const client = new PKAPI();
+export const client = new PKAPI();
+export const converter = new showdown.Converter({
+	simplifiedAutoLink: true,
+	strikethrough: true,
+	simpleLineBreaks: true,
+	requireSpaceBeforeHeadingText: true,
+	openLinksInNewWindow: true,
+	underline: true,
+	emoji: true,
+	ellipsis: false,
+	extensions: [handleSmallText]
+});
+
+function handleSmallText() {
+	return ({
+		type: 'lang',
+		filter: function(text, conv, options) {
+			var regex = /^-# (.*)/;
+			console.log(text);
+			let split = text.split('\n');
+			let replaced = '';
+			for(var s of split) {
+				let matches = s.match(regex);
+				console.log(matches);
+				if(matches) {
+					s = `<small>${matches[1]}</small>`;
+				}
+
+				replaced += `\n${s}`;
+			}
+			
+			return replaced;
+		}
+	})
+}
 
 export const BUILD = async (event, hook, embed) => {
 	console.log(event);

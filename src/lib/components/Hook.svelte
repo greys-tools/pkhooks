@@ -12,15 +12,13 @@
 	import { toaster } from '$lib/stores/toaster.js';
 	import { EVENTS, EventNames } from '$lib/constants.js';
 	import { enhancedUpdate as upd } from '$lib/utils/misc.js';
+	import EmbedComponents from '$lib/components/embeds/index.js';
 
 	let { data, open = $bindable() } = $props();
 	let event = $state(EVENTS[0]);
 	let selected = $derived.by(() => data.embeds.find(x => x.event == event));
-	let color = $state(selected?.data?.color ? `#${selected.data.color}` : "#aaaaaa");
-
-	const onChange = () => {
-		color = selected?.data?.color ? `#${selected.data.color}` : "#aaaaaa";
-	}
+	let color = $derived.by(() => selected?.data?.color ? `#${selected.data.color}` : "#aaaaaa");
+	let comps = $derived.by(() => selected?.format ?? []);
 </script>
 
 <div class="w-full rounded-md preset-outlined-surface-300-700 p-4">
@@ -61,7 +59,7 @@
 				<label class="label">
 					<span class="">Event</span>
 					<div class="grid grid-cols-[1fr_auto] mb-4 gap-2">
-						<select class="select" name="event" bind:value={event} onchange={onChange}>
+						<select class="select" name="event" bind:value={event}>
 							{#each EVENTS as evt}
 								<option value={evt}>{EventNames.get(evt)}</option>
 							{/each}
@@ -75,6 +73,18 @@
 				<div class="grid grid-cols-[auto_1fr] gap-2">
 					<input class="input" type="color" bind:value={color} />
 					<input class="input" type="text" bind:value={color} readonly tabindex="-1" name='color' />
+				</div>
+
+				<div class="grid grid-rows-2 gap-2 md:grid-cols-2 md:grid-rows-1">
+					<div class="card p-0 overflow-hidden rounded-sm border border-surface-100/50 dark:border-surface-700 dark:bg-surface-800/50 ">
+						<div class="p-4 border-l-3" style={`border-color: ${color}`}>
+							<EmbedComponents.text.component data={`# Test\n## Test 2\n### Test 3\nnormal text **bold text** *italic text*\n-# small text\n-# more small text`} />
+							<EmbedComponents.image.component data={{ url: 'https://cdn.selenated.com/img/hf8rb.png', alt: 'banner' }} />
+						</div>
+					</div>
+
+					<div class="">
+					</div>
 				</div>
 			</form>
 		</div>

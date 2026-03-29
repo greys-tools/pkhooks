@@ -31,9 +31,8 @@
     if(st) {
     	if(st.mode == 'dark' || (st.mode == 'system' && prefer)) window.document.documentElement.dataset.mode = 'dark';
       else if(st.mode == 'light') window.document.documentElement.dataset.mode = 'light';
-
-      if(st.theme?.length) window.document.documentElement.dataset.theme = st.theme;
-      else window.document.documentElement.dataset.theme = 'concord';
+				
+			window.document.documentElement.dataset.theme = 'concord';
     } else {
     	window.document.documentElement.dataset.theme = 'concord';
     	if(prefer) window.document.documentElement.dataset.mode = 'dark';
