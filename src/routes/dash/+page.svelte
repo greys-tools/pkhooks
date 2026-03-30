@@ -26,9 +26,6 @@
 	let showInfo = $state(inform ?? false);
 	let hooks = $derived(data.hooks);
 
-	$inspect(form)
-	$inspect(hooks)
-
 	let siteHook = $derived(`${PUBLIC_HOST}/integrations/hooks/${data.user.id}`);
 	let copy = async () => {
 		await navigator.clipboard.writeText(siteHook)

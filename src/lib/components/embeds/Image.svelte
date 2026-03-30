@@ -1,8 +1,8 @@
 <script>
 	let { data } = $props();
 
-	let url = $derived(data.url);
-	let alt = $derived(data.alt);
+	let url = $derived(data.config.url);
+	let alt = $derived(data.config.alt);
 </script>
 
 <div class="w-full">

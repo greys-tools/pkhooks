@@ -73,7 +73,7 @@ export const actions = {
 		let fd = await request.formData();
 		let hook = fd.get('hook');
 		let event = fd.get('event');
-		let format = fd.get('format');
+		let format = fd.get('format-json');
 		let data = fd.get('data');
 		let color = fd.get('color');
 

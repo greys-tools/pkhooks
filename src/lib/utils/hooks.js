@@ -11,7 +11,7 @@ export const converter = new showdown.Converter({
 	underline: true,
 	emoji: true,
 	ellipsis: false,
-	extensions: [handleSmallText]
+	extensions: [handleSmallText, handleCustomEmojis]
 });
 
 function handleSmallText() {
@@ -20,13 +20,36 @@ function handleSmallText() {
 		filter: function(text, conv, options) {
 			let regex = /^-# (.*)/gm;
 			for(let match of text.matchAll(regex)) {
-				console.log(match);
 				text = text.replace(match[0], `<small>${match[1]}</small>`)
 			}
 			
 			return text;
 		}
 	})
+}
+
+function handleCustomEmojis() {
+	return ({
+		type: 'lang',
+		filter: function(text) {
+			let regex = /<(?<gif>a)?:(?<name>\w+):(?<id>\d+)>/g;
+			for(let match of text.matchAll(regex)) {
+				text = text.replace(match[0], customEmoji(match.groups));
+			}
+			
+			return text;
+		}
+	})
+}
+
+function customEmoji(data) {
+	return `
+		<img
+			class="emoji"
+			src="https://cdn.discordapp.com/emojis/${data.id}.${data.gif ? "gif" : "png"}"
+			alt="${data.name + " emoji"}"
+		/>
+	`.split("\n").join(" "); // dumb trick so it doesn't mess with the rest of parsing
 }
 
 export const BUILD = async (event, hook, embed) => {

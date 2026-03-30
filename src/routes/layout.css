@@ -34,3 +34,10 @@
 		opacity: .75;
 	}
 }
+
+img.emoji {
+	height: 1em;
+	width: auto;
+	margin: 0 .1em;
+	display: inline-block;
+}
