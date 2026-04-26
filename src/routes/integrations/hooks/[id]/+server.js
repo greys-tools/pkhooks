@@ -12,7 +12,8 @@ export async function POST({ request: req, params }) {
 
 	if(user.key && user.key !== data.signing_token) return error(401, 'Invalid signing token.');
 	if(data.system_id && data.system_id !== user.systemId) {
-		await db.update(users).set({ systemId: data.system_id }).where(eq(users.id, user.id));
+		user.systemId = data.system_id;
+		await user.save();
 	}
 	if(data.type == 'PING') {
 		return json({ success: true });
@@ -55,7 +56,7 @@ export async function POST({ request: req, params }) {
 		}
 
 		if(resp.ok) {
-			await db.insert(logs).values({
+			await stores.logs.create({
 				userId: hook.userId,
 				hookId: hook.id,
 				status: errors.length ? 'Error' : 'Success',
@@ -66,7 +67,7 @@ export async function POST({ request: req, params }) {
 			})
 		} else {
 			let errtext = await resp.text();
-			await db.insert(logs).values({
+			await stores.logs.create({
 				userId: hook.userId,
 				hookId: hook.id,
 				status: 'Error',

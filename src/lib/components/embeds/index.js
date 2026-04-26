@@ -1,5 +1,6 @@
 import Text from './Text.svelte';
 import Image from './Image.svelte';
+import Payload from './Payload.svelte';
 
 const EmbedComponents = {
 	'text': {
@@ -25,6 +26,11 @@ const EmbedComponents = {
 				default: "Banner",
 			},
 		},
+	},
+	'payload': {
+		type: 'payload',
+		component: Payload,
+		config: { },
 	},
 }
 

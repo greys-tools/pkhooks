@@ -49,13 +49,40 @@ function customEmoji(data) {
 			src="https://cdn.discordapp.com/emojis/${data.id}.${data.gif ? "gif" : "png"}"
 			alt="${data.name + " emoji"}"
 		/>
-	`.split("\n").join(" "); // dumb trick so it doesn't mess with the rest of parsing
+	`.split("\n").join(" ");
+		// ^ dumb trick so it doesn't mess with the rest of parsing
+		// i just didn't wanna put it all on one line tbh
 }
 
 export const BUILD = async (event, hook, embed) => {
-	console.log(event);
-	let comps = await HOOKS[event.type](event);
-	if(comps?.err) return comps;
+	console.log(event, embed);
+	let comps = [];
+	let pcomps;
+	let hitPayload = false;
+	for(var c of embed.format) {
+		switch(c.type) {
+			case 'text':
+				comps.push(TEXT(c.config.content));
+				break;
+			case 'image':
+				comps.push(IMAGE(c.config));
+				break;
+			case 'payload':
+				hitPayload = true;
+				pcomps = await HOOKS[event.type](event);
+				if(pcomps?.err) return pcomps;
+				comps = comps.concat(pcomps);
+				break;
+			default:
+				break;
+		}
+	}
+
+	if(!hitPayload) { // add payload info at bottom if it wasn't in components
+		pcomps = await HOOKS[event.type](event);
+		if(pcomps?.err) return pcomps;
+		comps = comps.concat(pcomps);
+	}
 
 	return BASE(comps, embed.data?.color);
 }
@@ -66,6 +93,14 @@ export const BASE = (comps, color = 'ee8833') => ({
 		type: 17,
 		accent_color: parseInt(color, 16),
 		components: comps
+	}]
+})
+
+export const IMAGE = (data) => ({
+	type: 12,
+	items: [{
+		media: { url: data.url },
+		description: data.alt
 	}]
 })
 
@@ -81,7 +116,16 @@ export const SEP = () => ({
 export const TIMESTAMP = (date, format) => `<t:${Math.floor(date.getTime() / 1000)}:${format ?? 'F'}>`;
 
 export const HOOKS = {
-	'UPDATE_SYSTEM': () => {},
+	'UPDATE_SYSTEM': async (event) => {
+		let { data } = event;
+
+		let content = `### Data Changed\n`;
+		for(var k in data) {
+			content += `**${k}**: ${data[k]}\n`
+		}
+
+		return [TEXT(content)];
+	},
 	'UPDATE_SETTINGS': () => {},
 	
 	'CREATE_MEMBER': () => {},
@@ -116,15 +160,16 @@ export const HOOKS = {
 			return { success: false, err: e.message ?? e };
 		}
 
-		comps.push(TEXT('## Switch Logged\n### Members'));
+		let content = '### Members\n';
 		if(members?.length) {
-			comps.push(TEXT(members.map((m) => `- ${m.name}`).join('\n')));
+			content += members.map((m) => `- ${m.name}`).join('\n');
 		} else {
-			comps.push(TEXT('*All fronters switched out.*'));
+			content += '*All fronters switched out.*'
 		}
 
-		comps.push(SEP());
-		comps.push(TEXT(`-# Timestamp: ${TIMESTAMP(new Date(data.timestamp))} | Switch ID: ${data.id}`))
+		content += `\n-# Timestamp: ${TIMESTAMP(new Date(data.timestamp))}\n-# Switch ID: \`${data.id}\``;
+
+		comps.push(TEXT(content))
 
 		return comps;
 	},

@@ -118,7 +118,7 @@
 									class={`text-left w-full p-1 hover:ring-2 hover:ring-primary-500 rounded-md ${scomp?.id == comp.id && 'ring-2 ring-primary-500'}`}
 									onclick={() => selectComp(comp.id)}
 								>
-									<Component data={comp} />
+									<Component data={comp} event={event} />
 								</button>
 							{/each}
 						</div>

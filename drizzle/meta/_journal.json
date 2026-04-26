@@ -22,6 +22,13 @@
       "when": 1774436182553,
       "tag": "0002_whole_earthquake",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1777243601759,
+      "tag": "0003_oval_toro",
+      "breakpoints": true
     }
   ]
 }
