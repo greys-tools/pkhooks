@@ -1,5 +1,6 @@
 import Text from './Text.svelte';
 import Image from './Image.svelte';
+import Separator from './Separator.svelte';
 import Payload from './Payload.svelte';
 
 const EmbedComponents = {
@@ -26,6 +27,11 @@ const EmbedComponents = {
 				default: "Banner",
 			},
 		},
+	},
+	'separator': {
+		type: 'separator',
+		component: Separator,
+		config: { },
 	},
 	'payload': {
 		type: 'payload',

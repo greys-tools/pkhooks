@@ -71,11 +71,13 @@ export const actions = {
 		if(!locals?.user) return fail(401, { success: false, err: 'Must be logged in.' });
 
 		let fd = await request.formData();
+		console.log(fd);
 		let hook = fd.get('hook');
 		let event = fd.get('event');
 		let format = fd.get('format-json');
 		let data = fd.get('data');
 		let color = fd.get('color');
+		let enabled = fd.get('enabled');
 
 		if(format?.length) format = JSON.parse(format);
 		else format = {};
@@ -83,12 +85,12 @@ export const actions = {
 		else data = {};
 
 		data.color = color.replace('#', '');
+		data.enabled = enabled?.length ? true : false;
 
 		let all = await stores.embeds.getByEvent(locals.user.id, event);
 		let embed;
 		if(all?.length) embed = all.find(x => x.hookId == hook);
-		console.log(all, embed);
-
+	
 		if(embed) {
 			embed.format = format;
 			embed.data = data;

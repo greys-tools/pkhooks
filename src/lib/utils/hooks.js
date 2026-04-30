@@ -54,36 +54,39 @@ function customEmoji(data) {
 		// i just didn't wanna put it all on one line tbh
 }
 
+const COMPONENTS = {
+	'text': (c) => {
+		return [TEXT(c.config)];
+	},
+	'image': (c) => {
+		return [IMAGE(c.config)]
+	},
+	'separator': (c) => {
+		return [SEP()]
+	},
+	'payload': async (c, evt) => {
+		console.log(evt);
+		return await HOOKS[evt.type](evt);
+	}
+}
+
 export const BUILD = async (event, hook, embed) => {
 	console.log(event, embed);
 	let comps = [];
 	let pcomps;
 	let hitPayload = false;
 	for(var c of embed.format) {
-		switch(c.type) {
-			case 'text':
-				comps.push(TEXT(c.config.content));
-				break;
-			case 'image':
-				comps.push(IMAGE(c.config));
-				break;
-			case 'payload':
-				hitPayload = true;
-				pcomps = await HOOKS[event.type](event);
-				if(pcomps?.err) return pcomps;
-				comps = comps.concat(pcomps);
-				break;
-			default:
-				break;
-		}
+		if(c.type == 'payload') hitPayload = true;
+		let x = await COMPONENTS[c.type](c, event);
+		comps = comps.concat(x);
 	}
 
 	if(!hitPayload) { // add payload info at bottom if it wasn't in components
 		pcomps = await HOOKS[event.type](event);
-		if(pcomps?.err) return pcomps;
 		comps = comps.concat(pcomps);
 	}
 
+	console.log(comps);
 	return BASE(comps, embed.data?.color);
 }
 
@@ -96,7 +99,7 @@ export const BASE = (comps, color = 'ee8833') => ({
 	}]
 })
 
-export const IMAGE = (data) => ({
+export const IMAGE = (data = { }) => ({
 	type: 12,
 	items: [{
 		media: { url: data.url },
@@ -104,7 +107,7 @@ export const IMAGE = (data) => ({
 	}]
 })
 
-export const TEXT = (content) => ({
+export const TEXT = ({ content } = { }) => ({
 	type: 10,
 	content
 })
@@ -124,7 +127,7 @@ export const HOOKS = {
 			content += `**${k}**: ${data[k]}\n`
 		}
 
-		return [TEXT(content)];
+		return [TEXT({ content })];
 	},
 	'UPDATE_SETTINGS': () => {},
 	
@@ -143,7 +146,19 @@ export const HOOKS = {
 	'UPDATE_SYSTEM_GUILD': () => {},
 	'UPDATE_MEMBER_GUILD': () => {},
 	
-	'CREATE_MESSAGE': () => {},
+	'CREATE_MESSAGE': async (event) => {
+		let { data } = event;
+		let content = [
+			'### Message Info',
+			`**Member:** ${data.member.name} (\`${data.member.id}\`)`,
+			`**Server:** ${data.guild}`,
+			`**Channel:** ${data.channel}`,
+			`**Account:** ${data.sender}`,
+			`-# Message sent ${TIMESTAMP(new Date(data.timestamp))}`
+		].join('\n');
+
+		return [TEXT({ content })]
+	},
 	
 	'CREATE_SWITCH': async (event) => {
 		let { data } = event;
@@ -167,9 +182,9 @@ export const HOOKS = {
 			content += '*All fronters switched out.*'
 		}
 
-		content += `\n-# Timestamp: ${TIMESTAMP(new Date(data.timestamp))}\n-# Switch ID: \`${data.id}\``;
+		content += `\n-# Timestamp: ${TIMESTAMP(new Date(data.timestamp))}`;
 
-		comps.push(TEXT(content))
+		comps.push(TEXT({ content }))
 
 		return comps;
 	},

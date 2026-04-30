@@ -5,6 +5,10 @@
 	import { nanoid } from 'nanoid';
 
 	import {
+		Switch
+	} from '@skeletonlabs/skeleton-svelte';
+
+	import {
 		ChevronRight as Open,
 		ChevronDown as Close,
 		Save,
@@ -20,17 +24,19 @@
 	let event = $state(EVENTS[0]);
 	let selected = $derived.by(() => data.embeds.find(x => x.event == event));
 	let sdata = $state({
+		enabled: selected?.data?.enabled !== false ? true : false,
 		color: selected?.data?.color ? `#${selected.data.color}` : "#aaaaaa",
 		comps: Array.isArray(selected?.format) ? selected.format : [],
 	});
 	let stringed = $derived(JSON.stringify(sdata.comps));
 	let ctype = $state('text');
 	let scomp = $state({});
-	$inspect(sdata.comps, stringed);
+	$inspect(sdata);
 
 	const onSelectChange = ({ target: { value } }) => {
 		console.log(value);
 		sdata = {
+			enabled: selected?.data?.enabled !== false ? true : false,
 			color: selected?.data?.color ? `#${selected.data.color}` : "#aaaaaa",
 			comps: Array.isArray(selected?.format) ? selected.format : [],
 		}
@@ -92,7 +98,7 @@
 				<input type="hidden" value={stringed} name="format-json" />
 				<label class="label">
 					<span class="">Event</span>
-					<div class="grid grid-cols-[1fr_auto] mb-4 gap-2">
+					<div class="grid grid-cols-[1fr_auto_auto] mb-4 gap-2">
 						<select class="select" name="event" bind:value={event} onchange={onSelectChange}>
 							{#each EVENTS as evt}
 								<option value={evt}>{EventNames.get(evt)}</option>
@@ -108,6 +114,14 @@
 					<input class="input" type="color" bind:value={sdata.color} />
 					<input class="input" type="text" bind:value={sdata.color} name='color' />
 				</div>
+
+				<Switch checked={sdata.enabled} onCheckedChange={(d) => sdata.enabled = d.checked}>
+					<Switch.Label class="text-base">Event enabled?</Switch.Label>
+					<Switch.Control>
+						<Switch.Thumb />
+					</Switch.Control>
+					<Switch.HiddenInput name="enabled" />
+				</Switch>
 
 				<div class="grid grid-rows-[auto_1fr] gap-2 md:grid-cols-2 md:grid-rows-1">
 					<div class="card p-0 overflow-hidden rounded-sm border border-surface-100/50 dark:border-surface-700 dark:bg-surface-800/50">

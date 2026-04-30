@@ -19,7 +19,7 @@ export async function POST({ request: req, params }) {
 		return json({ success: true });
 	}
 
-	const embeds = await stores.embeds.getByEvent(user.id, data.type);
+	const embeds = (await stores.embeds.getByEvent(user.id, data.type)).filter(x => x.data?.enabled !== false);
 	if(!embeds?.length) return json({ success: true, message: 'No embeds for that event; nothing to do.' });
 
 	let errors = [];
