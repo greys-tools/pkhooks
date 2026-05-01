@@ -26,11 +26,12 @@ export async function POST({ request: req, params }) {
 
 	for(let em of embeds) {
 		let { hook } = em;
-		console.log(`Dispatching webhook: ${hook.id}`, hook, data);
+		console.log(`Dispatching webhook: ${hook.id}`, hook);
 		
 		let resp;
 		try {
 			let built = await BUILD(data, hook, em);
+			console.log(built);
 			if(built.err) throw new Error(built);
 			resp = await fetch(`${hook.url}?with_components=true`, {
 				method: 'POST',
